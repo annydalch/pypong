@@ -24,11 +24,11 @@ opponent_score_count = Score_counter_class.Score_counter("freemono",
                                                          30,
                                                          ((globals.SCREEN_WIDTH / 2) + 30, globals.SCREEN_T_WITH_PADDING + 10),
                                                          globals.FOREGROUND_COLOR)
-opponent_paddle = Paddle_class.Paddle(globals.SCREEN_R_WITH_PADDING - globals.PADDLE_WIDTH,
-                                      globals.FOREGROUND_COLOR,
-                                      globals.PADDLE_SPEED,
-                                      globals.PADDLE_SIZE,
-                                      opponent_score_count)
+opponent_paddle = Paddle_class.Simple_opponent_paddle(globals.SCREEN_R_WITH_PADDING - globals.PADDLE_WIDTH,
+                                                      globals.FOREGROUND_COLOR,
+                                                      globals.PADDLE_SPEED,
+                                                      globals.PADDLE_SIZE,
+                                                      opponent_score_count)
 
 ball = Ball_class.Ball(globals.FOREGROUND_COLOR,
                        6,
@@ -44,13 +44,25 @@ def update():
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 sys.exit()
     key_mods = pygame.key.get_pressed()  # store the keyboard state in case it changes during the cycle
-    player_paddle.update(key_mods)  # update paddles
-    opponent_paddle.update(key_mods)
+    player_paddle.update(key_mods, ball)  # update paddles
+    opponent_paddle.update(key_mods, ball)
     ball.update(player_paddle, opponent_paddle)  # update the ball
 
 
+def draw_background(display):
+    display.fill(globals.BACKGROUND_COLOR)
+    pygame.draw.lines(display,
+                      globals.FOREGROUND_COLOR,
+                      True,
+                      [(globals.SCREEN_L_WITH_PADDING, globals.SCREEN_T_WITH_PADDING),
+                       (globals.SCREEN_R_WITH_PADDING, globals.SCREEN_T_WITH_PADDING),
+                       (globals.SCREEN_R_WITH_PADDING, globals.SCREEN_B_WITH_PADDING),
+                       (globals.SCREEN_L_WITH_PADDING, globals.SCREEN_B_WITH_PADDING)],
+                      2)
+                      
+
 def draw():  # all my draw methods take screen as an argument so it doesn't have to be in globals.py
-    screen.fill(globals.BACKGROUND_COLOR)  # fill with black
+    draw_background(screen)
     player_paddle.draw(screen)  # draw the player paddle
     opponent_paddle.draw(screen)  # draw the other paddle
     ball.draw(screen)  # draw the ball

@@ -25,17 +25,30 @@ class Paddle:
     def move(self, dy):  # this is kinda a silly function
         self.pos[1] += dy
 
-    def update(self, key_mods):  # this parent class doesn't have an update method, so we return False
+    def update(self, key_mods, ball):  # this parent class doesn't have an update method, so we return False
         return False
 
 
 class Player_paddle(Paddle):  # the class for the player's left paddle
     # future improvements: take keys as arguments during creation
     # to allow having 2-player or customizable keys
-    def update(self, key_mods):
+    def update(self, key_mods, ball):
         if key_mods[pygame.K_w] and (not key_mods[pygame.K_s]) and (not self.pos[1] < globals.SCREEN_T_WITH_PADDING):
             # a dense predicate. check if w is pressed, s is not, and you're within the screen
             self.move(-self.speed)
         if key_mods[pygame.K_s] and (not key_mods[pygame.K_w]) and (not (self.pos[1] + self.size[1]) > (globals.SCREEN_B_WITH_PADDING)):
             # same as the above predicate, but for s, w, and the bottom
             self.move(self.speed)
+
+
+class Simple_opponent_paddle(Paddle):
+    def update(self, key_mods, ball):
+        ball_middle = ball.pos[1] + (ball.size / 2)
+        paddle_middle = self.pos[1] + (self.size[1] / 2)
+        if (ball_middle > (paddle_middle + self.speed)):  # if the middle of the ball is further up than you can reach
+            self.move(self.speed)  # move as far towards it as you can
+        elif (ball_middle < (paddle_middle - self.speed)):  # if it's further down than you can reach
+            self.move(-self.speed)  # move as far towards it as you can
+        else:
+            self.move(ball_middle - paddle_middle)  # otherwise move to match its position
+        return True
