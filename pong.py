@@ -31,7 +31,7 @@ opponent_paddle = Paddle_class.Simple_opponent_paddle(globals.SCREEN_R_WITH_PADD
                                                       opponent_score_count)
 
 ball = Ball_class.Ball(globals.FOREGROUND_COLOR,
-                       6,
+                       globals.BALL_SPEED,
                        10,
                        player_score_count,
                        opponent_score_count)
