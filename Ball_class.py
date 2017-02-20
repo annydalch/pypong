@@ -1,20 +1,31 @@
 import globals
 import pygame
 import math
+import random
 
 
 class Ball:
-    def __init__(self, angle, color, vel, size):
+    def __init__(self, color, vel, size, left_scorecounter, right_scorecounter):
         # angle in radians
         # color of the ball
         # a float telling how fast it's going
         # an int telling how many pixels in diameter it is
-        self.delta = [(vel * math.cos(angle)),  # we convert angle and vel into dx and dy
-                      (vel * math.sin(angle))]  # immediately and store them as floats
         self.color = color
         self.size = size
-        self.pos = [((globals.SCREEN_WIDTH / 2) - (size / 2)),  # stick it in the middle both x-wise and y-wise
-                    ((globals.SCREEN_HEIGHT / 2) - (size / 2))]  # position is floats but make_rect rounds them for drawing
+        self.vel = vel
+        self.score_counters = (left_scorecounter, right_scorecounter)
+        self.reset_pos()
+
+    def reset_pos(self):
+        l_or_r = random.randint(0, 1)
+        if l_or_r == 0:
+            angle = (random.random() - .5) * 2
+        else:
+            angle = ((random.random() - .5) * 2) + 3.14
+        self.pos = [((globals.SCREEN_WIDTH / 2) - (self.size / 2)),
+                    ((globals.SCREEN_HEIGHT / 2) - (self.size / 2))]
+        self.delta = [(self.vel * math.cos(angle)),
+                      (self.vel * math.sin(angle))]
 
     def make_rect(self):
         # returns a nice rectangle for drawing
@@ -26,15 +37,16 @@ class Ball:
     def draw(self, display):
         pygame.draw.rect(display, self.color, self.make_rect(), 0)
 
+    def check_rl_borders(self):
+        if (self.pos[0] < globals.SCREEN_L_WITH_PADDING):
+            self.score_counters[1].earn_point()
+            self.reset_pos()
+        elif (self.pos[0] > globals.SCREEN_R_WITH_PADDING):
+            self.score_counters[0].earn_point()
+            self.reset_pos()
+
     def move(self):
-        newx = self.pos[0] + self.delta[0]  # calculate where you'll be after movement
-        newy = self.pos[1] + self.delta[1]
-        if not ((newx < globals.SCREEN_L_WITH_PADDING) or
-                (newx + self.size > globals.SCREEN_R_WITH_PADDING)):  # for the x direction, if it's a legal position, move there
-            self.pos[0] = newx
-        else:  # otherwise, flip the sign of your dx and move where that puts you instead
-            self.delta[0] *= -1
-            self.pos[0] += self.delta[0]
+        newy = self.pos[1] + self.delta[1]  # calculate where you'll be after movement
         
         if not ((newy < globals.SCREEN_T_WITH_PADDING) or  # for the y direction
                 (newy + self.size > globals.SCREEN_B_WITH_PADDING)):  # see if newy is a legal position
@@ -42,6 +54,8 @@ class Ball:
         else:  # otherwise, flip the sign of your dy and move with that instead
             self.delta[1] *= -1
             self.pos[1] += self.delta[1]
+        self.pos[0] += self.delta[0]
+        self.check_rl_borders()
 
     def update(self):
         self.move()
